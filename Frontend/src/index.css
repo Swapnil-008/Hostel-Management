@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #E6F0FA;
+  margin: 0;
+  padding: 0;
+  color: #1A3C5A;
+}
+
+/* Card Styles */
+.card {
+  @apply bg-white rounded-xl shadow-lg p-6 transition-transform transform hover:scale-105;
+}
+
+/* Facility Card Styles (for Landing Page) */
+.facility-card {
+  @apply bg-white rounded-xl shadow-lg p-6 text-center transition-transform transform hover:scale-105;
+}
+
+/* Button Styles */
+.button {
+  @apply bg-yellow-400 text-blue-900 font-medium py-2 px-6 rounded-full hover:bg-yellow-500 transition-colors duration-300;
+}
+
+/* Input Field Styles */
+.input-field {
+  @apply w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-300;
+}
+
+/* Navigation Link Styles */
+.nav-link {
+  @apply text-white hover:text-yellow-400 transition-colors duration-300;
+}
+
+/* Section Title Styles */
+.section-title {
+  @apply text-4xl font-bold text-blue-900 text-center mb-12;
+}
+
+/* Section Border Styles */
+.section-border {
+  @apply border-t-2 border-blue-200 pt-12;
+}
+
+/* Fade-in Animation */
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Profile Page Specific Styles */
+.profile-card {
+  @apply bg-white rounded-xl shadow-lg p-8 transform hover:scale-105 transition-transform duration-300;
+}
+
+.profile-avatar {
+  @apply text-blue-900 text-6xl relative;
+}
+
+.profile-badge {
+  @apply absolute bottom-0 right-0 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center text-blue-900 text-xs font-bold;
+}
+
+.notification-card {
+  @apply bg-blue-50 p-4 rounded-lg shadow-sm border-l-4 border-yellow-400;
+}
+
+/* Scrollbar Styles for Notifications */
+.notification-scroll {
+  @apply max-h-60 overflow-y-auto;
+}
+
+.notification-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notification-scroll::-webkit-scrollbar-track {
+  background: #E6F0FA;
+  border-radius: 4px;
+}
+
+.notification-scroll::-webkit-scrollbar-thumb {
+  background: #1A3C5A;
+  border-radius: 4px;
+}
+
+.notification-scroll::-webkit-scrollbar-thumb:hover {
+  background: #2A5A8A;
+}
+
+/* Additional Utility Styles */
+.text-primary {
+  @apply text-blue-900;
+}
+
+.text-secondary {
+  @apply text-gray-600;
+}
+
+.bg-primary {
+  @apply bg-blue-900;
+}
+
+.bg-secondary {
+  @apply bg-blue-50;
+}
+
+.border-primary {
+  @apply border-blue-200;
+}
+
+/* Custom Transition Class (Renamed to Avoid Circular Dependency) */
+.custom-transition {
+  @apply transition-all duration-300;
+}
