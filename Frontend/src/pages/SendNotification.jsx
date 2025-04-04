@@ -42,7 +42,7 @@ const SendNotification = () => {
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="bg-blue-50 py-20 text-center fade-in">
+        <section className="bg-blue-50 p-10 text-center fade-in">
           <h1 className="text-5xl font-bold text-blue-900 mb-4">Send General Notification</h1>
           <p className="text-xl text-gray-600 mb-8">Notify All Students</p>
         </section>

@@ -19,12 +19,12 @@ const AdminDashboard = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-blue-50 py-20 text-center fade-in">
-          <h1 className="text-5xl font-bold text-blue-900 mb-4">Admin Dashboard</h1>
-          <p className="text-xl text-gray-600 mb-8">Manage Hostel Operations</p>
+          <h1 className="text-5xl font-bold text-blue-900 mb-1">Admin Dashboard</h1>
+          <p className="text-xl text-gray-600 ">Manage Hostel Operations</p>
         </section>
 
         {/* Navigation Cards */}
-        <section className="py-16 bg-blue-50 section-border">
+        <section className="py-10 bg-blue-50 section-border">
           <h2 className="section-title">Admin Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <Link to="/admin-complaints" className="card">

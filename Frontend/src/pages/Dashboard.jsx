@@ -39,6 +39,8 @@ const Dashboard = () => {
               <h3 className="text-xl font-semibold text-blue-900 mb-2">View Attendance</h3>
               <p className="text-gray-600">Check your attendance.</p>
             </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-5">
             <Link to="/laundry" className="card">
               <FaTshirt className="text-blue-900 text-4xl mb-4" />
               <h3 className="text-xl font-semibold text-blue-900 mb-2">Laundry Request</h3>

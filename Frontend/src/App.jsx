@@ -17,6 +17,7 @@ import AdminLeavesView from './components/AdminLeavesView';
 import RoomAllocation from './components/RoomAllocation';
 import AdminRoomAllocation from './pages/AdminRoomAllocation';
 import SendNotification from './pages/SendNotification'; // New
+import AddStudent from './pages/AddStudent';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path="/room-allocation" element={<RoomAllocation />} />
           <Route path="/admin-room-allocation" element={<AdminRoomAllocation />} />
           <Route path="/send-notification" element={<SendNotification />} /> {/* New */}
+          <Route path="/add-student" element={<AddStudent />} />
         </Routes>
       </div>
     </Router>

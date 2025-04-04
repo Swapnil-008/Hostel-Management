@@ -102,34 +102,31 @@ CREATE TABLE notifications (
 
 CREATE TABLE rooms (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  size VARCHAR(50), -- e.g., 'Small (8x10)', 'Medium (10x12)', 'Large (12x14)'
-  capacity INT, -- e.g., 2 or 3 members
-  has_washroom BOOLEAN, -- 1 for yes, 0 for no
-  has_gallery BOOLEAN, -- 1 for yes, 0 for no
-  rent_per_person INT, -- Calculated rent per person
-  total_rent INT, -- Total rent for the room
-  available BOOLEAN DEFAULT TRUE -- Whether the room is available
+  hostel_type VARCHAR(10) NOT NULL, -- 'Girls' or 'Boys'
+  building_type VARCHAR(10), -- 'New' or 'Old' (NULL for Boys' Hostel)
+  floor INT NOT NULL, -- Floor number (1 to 6)
+  room_number VARCHAR(10) NOT NULL, -- e.g., '101', '102'
+  capacity INT NOT NULL DEFAULT 2, -- Fixed at 2 members per room
+  has_washroom BOOLEAN DEFAULT TRUE, -- 1 for yes, 0 for no
+  has_bathroom BOOLEAN DEFAULT TRUE, -- 1 for yes, 0 for no
+  has_balcony BOOLEAN DEFAULT FALSE, -- 1 for yes, 0 for no
+  rent_per_person INT NOT NULL, -- Rent per person
+  total_rent INT NOT NULL, -- Total rent for the room
+  member1_id INT DEFAULT NULL, -- Student ID for first member
+  member2_id INT DEFAULT NULL, -- Student ID for second member
+  FOREIGN KEY (member1_id) REFERENCES students(id) ON DELETE SET NULL,
+  FOREIGN KEY (member2_id) REFERENCES students(id) ON DELETE SET NULL
 );
 
-CREATE TABLE room_preferences (
+CREATE TABLE reservations (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  student_id INT,
-  preferred_capacity INT, -- 2 or 3 members
-  same_state_preference BOOLEAN, -- 1 for yes, 0 for no
-  attached_washroom BOOLEAN, -- 1 for yes, 0 for no
-  gallery BOOLEAN, -- 1 for yes, 0 for no
-  allocated_room_id INT DEFAULT NULL, -- Foreign key to rooms table
-  FOREIGN KEY (student_id) REFERENCES students(id),
-  FOREIGN KEY (allocated_room_id) REFERENCES rooms(id)
-);
-
--- Wardens Table
-CREATE TABLE wardens (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  phone_no VARCHAR(15),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  room_id INT NOT NULL,
+  student_id INT NOT NULL,
+  reserved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP NOT NULL, -- Reservation expires after 30 minutes
+  status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'completed', 'expired'
+  FOREIGN KEY (room_id) REFERENCES rooms(id),
+  FOREIGN KEY (student_id) REFERENCES students(id)
 );
 
 -- Hostel Doctors Table

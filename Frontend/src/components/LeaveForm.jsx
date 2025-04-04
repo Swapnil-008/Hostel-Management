@@ -28,7 +28,7 @@ const LeaveForm = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow flex items-center justify-center bg-blue-50">
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full m-10">
           <div className="flex items-center justify-center mb-6">
             <FaCalendarAlt className="text-blue-900 text-3xl mr-2" />
             <h2 className="text-2xl font-bold text-blue-900">Submit a Leave Request</h2>

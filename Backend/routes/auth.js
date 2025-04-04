@@ -16,8 +16,10 @@ router.post('/login/student', async (req, res) => {
     if (!match) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
-    // Fetch notifications for the student
-    const [notifications] = await db.query('SELECT * FROM notifications WHERE student_id = ? ORDER BY created_at DESC', [student.id]);
+    const [notifications] = await db.query(
+      'SELECT * FROM notifications WHERE student_id = ? ORDER BY created_at DESC',
+      [student.id]
+    );
     res.json({ ...student, notifications });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -45,14 +47,17 @@ router.post('/login/admin', async (req, res) => {
 
 // Student Register
 router.post('/register/student', async (req, res) => {
-  const { name, email, password, room_number } = req.body;
+  const { name, email, password } = req.body;
   try {
     const [existing] = await db.query('SELECT * FROM students WHERE email = ?', [email]);
     if (existing.length > 0) {
       return res.status(400).json({ error: 'Email already exists' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    await db.query('INSERT INTO students (name, email, password, room_number) VALUES (?, ?, ?, ?)', [name, email, hashedPassword, room_number]);
+    await db.query(
+      'INSERT INTO students (name, email, password) VALUES (?, ?, ?)',
+      [name, email, hashedPassword]
+    );
     res.status(201).json({ message: 'Student registered successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });

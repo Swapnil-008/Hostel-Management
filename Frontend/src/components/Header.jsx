@@ -32,6 +32,9 @@ const Header = () => {
                   <Link to="/send-notification" className="hover:text-blue-300 transition-colors duration-300">
                     Send Notification
                   </Link>
+                  <Link to="/add-student" className="hover:text-blue-300 transition-colors duration-300">
+                    Add Student
+                  </Link>
                   <Link to="/profile" className="hover:text-blue-300 transition-colors duration-300">
                     Profile
                   </Link>

@@ -12,7 +12,7 @@ const roomsRoutes = require('./routes/rooms');
 const adminRoutes = require('./routes/admins');
 const hostelDoctorsRoutes = require('./routes/hostelDoctors');
 const hostelRulesRoutes = require('./routes/hostelRules');
-const hostelImagesRoutes = require('./routes/hostelImages'); // New
+const hostelImagesRoutes = require('./routes/hostelImages');
 
 const app = express();
 
@@ -31,7 +31,24 @@ app.use('/api/rooms', roomsRoutes);
 app.use('/api/admins', adminRoutes);
 app.use('/api/hostel-doctors', hostelDoctorsRoutes);
 app.use('/api/hostel-rules', hostelRulesRoutes);
-app.use('/api/hostel-images', hostelImagesRoutes); // New
+app.use('/api/hostel-images', hostelImagesRoutes);
+
+app.put('/api/test-put', (req, res) => {
+  console.log('Test PUT request received:', req.body);
+  res.json({ message: 'Test PUT successful' });
+});
+
+
+app.get('/api/test', (req, res) => {
+  console.log('Test GET request received');
+  res.json({ message: 'Server is running' });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Global error:', err);
+  res.status(500).json({ error: 'Something went wrong on the server', details: err.message });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

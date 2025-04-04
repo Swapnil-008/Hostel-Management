@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FaUserCircle, FaEnvelope, FaHome, FaBell, FaTrash, FaPhone } from 'react-icons/fa';
 import axios from 'axios';
 import Header from '../components/Header';
@@ -13,26 +13,39 @@ const Profile = () => {
     if (!user) {
       navigate('/');
     } else if (user.username) {
-      // Fetch admin's updated profile to get phoneNo
+      // Fetch admin's updated profile and notifications
       const fetchAdminProfile = async () => {
         try {
           const res = await axios.get(`http://localhost:5000/api/admins/${user.id}`);
-          const updatedUser = { ...user, ...res.data };
+          const [notifications] = await axios.get(`http://localhost:5000/api/notifications?admin_id=${user.id}`);
+          const updatedUser = { ...user, ...res.data, notifications: notifications.data };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
         } catch (err) {
           console.error('Error fetching admin profile:', err);
-          // alert('Failed to fetch admin profile');
         }
       };
       fetchAdminProfile();
+    } else {
+      // Fetch student's updated profile and notifications
+      const fetchStudentProfile = async () => {
+        try {
+          const res = await axios.get(`http://localhost:5000/api/students/${user.id}`);
+          const [notifications] = await axios.get(`http://localhost:5000/api/notifications?student_id=${user.id}`);
+          const updatedUser = { ...user, ...res.data, notifications: notifications.data };
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        } catch (err) {
+          console.error('Error fetching student profile:', err);
+        }
+      };
+      fetchStudentProfile();
     }
   }, [navigate, user]);
 
   const handleDeleteNotification = async (notificationId) => {
     try {
       await axios.delete(`http://localhost:5000/api/notifications/${notificationId}`);
-      // Update the user state to remove the deleted notification
       const updatedNotifications = user.notifications.filter((notification) => notification.id !== notificationId);
       const updatedUser = { ...user, notifications: updatedNotifications };
       setUser(updatedUser);
@@ -44,6 +57,11 @@ const Profile = () => {
     }
   };
 
+  const extractEmailFromMessage = (message) => {
+    const emailMatch = message.match(/Email: ([^\s,]+)/);
+    return emailMatch ? emailMatch[1] : '';
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -52,7 +70,6 @@ const Profile = () => {
         <div className="max-w-3xl mx-auto">
           {user && (
             <div className="profile-card">
-              {/* Profile Card */}
               <div className="flex items-center space-x-6 mb-8">
                 <div className="relative">
                   <FaUserCircle className="profile-avatar" />
@@ -66,7 +83,6 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Profile Details */}
               <div className="space-y-6">
                 <div className="flex items-center space-x-3">
                   <FaEnvelope className="text-blue-900 text-xl" />
@@ -88,14 +104,13 @@ const Profile = () => {
                     <FaHome className="text-blue-900 text-xl" />
                     <div>
                       <p className="text-blue-900 font-medium">Room Number</p>
-                      <p className="text-gray-600">{user.room_number || 'N/A'}</p>
+                      <p className="text-gray-600">{user.room_number || 'Not assigned'}</p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Notifications Section (for Students) */}
-              {user && !user.username && user.notifications && user.notifications.length > 0 && (
+              {user && user.notifications && user.notifications.length > 0 && (
                 <div className="mt-10">
                   <div className="flex items-center space-x-3 mb-6">
                     <FaBell className="text-blue-900 text-2xl" />
@@ -112,6 +127,14 @@ const Profile = () => {
                             {notification.notification_type} from {notification.admin_name}
                           </p>
                           <p className="text-blue-900 mt-1">{notification.message}</p>
+                          {notification.notification_type === 'Room Allocation' && user.username && (
+                            <Link
+                              to={`/add-student?email=${extractEmailFromMessage(notification.message)}`}
+                              className="text-blue-500 hover:underline mt-2 block"
+                            >
+                              Create Student Account
+                            </Link>
+                          )}
                           <p className="text-gray-500 text-sm mt-1">
                             Received: {new Date(notification.created_at).toLocaleString()}
                           </p>
