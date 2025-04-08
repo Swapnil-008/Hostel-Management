@@ -67,7 +67,7 @@ const Profile = () => {
       <Header />
       <main className="flex-grow py-16 bg-blue-50">
         <h2 className="section-title">{user?.username ? 'Admin Profile' : 'Student Profile'}</h2>
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {user && (
             <div className="profile-card">
               <div className="flex items-center space-x-6 mb-8">

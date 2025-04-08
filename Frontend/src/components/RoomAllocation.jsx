@@ -358,18 +358,18 @@ const RoomAllocation = () => {
         )}
 
         {(view === 'girls-new' || view === 'girls-old') && (
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <h2 className="section-title">
               Girls' Hostel - {view === 'girls-new' ? 'New Building' : 'Old Building'}
             </h2>
             <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
               <h3 className="text-2xl font-bold text-blue-900 mb-4">Instructions</h3>
-              <p className="text-gray-600 font-bold">
+              <p className="text-gray-600 font-semibold">
                 {view === 'girls-new'
                   ? 'Every room in the New Building has an attached washroom, bathroom, and balcony. Each room accommodates 2 members.'
                   : 'Every room in the Old Building has an attached washroom and bathroom but no balcony. Each room accommodates 2 members.'}
               </p>
-              <p className="text-gray-600 mt-2 font-bold">
+              <p className="text-gray-600 mt-2 font-semibold">
                 Rent: ₹{view === 'girls-new' ? '8000' : '7000'} per person per month. Annual rent: ₹{view === 'girls-new' ? '96000' : '84000'} per person.
               </p>
             </div>
@@ -395,7 +395,7 @@ const RoomAllocation = () => {
 
             <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
               <h3 className="text-2xl font-bold text-blue-900 mb-4">Building Layout</h3>
-              <p className="text-gray-600 mb-4 font-bold">
+              <p className="text-gray-600 mb-4 font-semibold">
                 The building has 6 floors, with 8 rooms per floor. All rooms have a capacity of 2 members.
               </p>
               <div className="flex space-x-4 mb-4 font-medium">
@@ -455,7 +455,7 @@ const RoomAllocation = () => {
             {reservation && (
               <div className="bg-white rounded-xl shadow-lg p-8">
                 <h3 className="text-2xl font-bold text-blue-900 mb-4">Complete Payment</h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-4 font-semibold">
                   You have reserved a seat, {userName}. Complete the payment within the time limit to confirm your booking.
                 </p>
                 <p className="text-gray-600 mb-4 flex items-center">
@@ -477,10 +477,10 @@ const RoomAllocation = () => {
             <h2 className="section-title">Boys' Hostel</h2>
             <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
               <h3 className="text-2xl font-bold text-blue-900 mb-4">Instructions</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 font-semibold">
                 Every room in the Boys' Hostel has an attached washroom and bathroom but no balcony. Each room accommodates 2 members.
               </p>
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-600 mt-2 font-semibold">
                 Rent: ₹7000 per person per month. Annual rent: ₹84000 per person.
               </p>
             </div>
@@ -495,7 +495,7 @@ const RoomAllocation = () => {
 
             <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
               <h3 className="text-2xl font-bold text-blue-900 mb-4">Building Layout</h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-4 font-semibold">
                 The building has 6 floors, with 8 rooms per floor. All rooms have a capacity of 2 members.
               </p>
               <div className="flex space-x-4 mb-4">
@@ -555,7 +555,7 @@ const RoomAllocation = () => {
             {reservation && (
               <div className="bg-white rounded-xl shadow-lg p-8">
                 <h3 className="text-2xl font-bold text-blue-900 mb-4">Complete Payment</h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-4 font-semibold">
                   You have reserved a seat, {userName}. Complete the payment within the time limit to confirm your booking.
                 </p>
                 <p className="text-gray-600 mb-4 flex items-center">

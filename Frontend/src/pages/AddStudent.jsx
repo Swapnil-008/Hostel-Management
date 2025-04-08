@@ -52,7 +52,7 @@ const AddStudent = () => {
             <div className="mb-4 relative">
               <label className="block text-blue-900 font-medium mb-2">Name</label>
               <div className="flex items-center">
-                <FaUser className="absolute left-3 text-gray-500" />
+                <FaUser className="absolute right-3 text-gray-500" />
                 <input
                   type="text"
                   value={name}
@@ -66,7 +66,7 @@ const AddStudent = () => {
             <div className="mb-4 relative">
               <label className="block text-blue-900 font-medium mb-2">Email</label>
               <div className="flex items-center">
-                <FaEnvelope className="absolute left-3 text-gray-500" />
+                <FaEnvelope className="absolute right-3 text-gray-500" />
                 <input
                   type="email"
                   value={email}
@@ -80,7 +80,7 @@ const AddStudent = () => {
             <div className="mb-4 relative">
               <label className="block text-blue-900 font-medium mb-2">Password</label>
               <div className="flex items-center">
-                <FaLock className="absolute left-3 text-gray-500" />
+                <FaLock className="absolute right-3 text-gray-500" />
                 <input
                   type="password"
                   value={password}

@@ -4,6 +4,12 @@ import { FaBed, FaBath, FaImage, FaUser } from 'react-icons/fa';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Navigate } from 'react-router-dom';
+import roomWithBalcony1 from '../assets/room_with_balcony1.png';
+import roomWithBalcony2 from '../assets/room_with_balcony2.png';
+import roomWithoutBalcony1 from '../assets/room_without_balcony1.png';
+import roomWithoutBalcony2 from '../assets/room_without_balcony2.png';
+import boys1 from '../assets/boys_room1.png';
+import boys2 from '../assets/boys_room2.png';
 
 const AdminRoomAllocation = () => {
   const [view, setView] = useState('hostels'); // 'hostels', 'girls', 'boys', 'girls-new', 'girls-old'
@@ -182,158 +188,55 @@ const AdminRoomAllocation = () => {
           </div>
         )}
 
-        {(view === 'girls-new' || view === 'girls-old') && (
-          <div className="max-w-5xl mx-auto">
+        {(view === 'girls-new' || view === 'girls-old' || view === 'boys') && (
+          <div className="max-w-7xl mx-auto">
             <h2 className="section-title">
-              Girls' Hostel - {view === 'girls-new' ? 'New Building' : 'Old Building'}
+              {view === 'girls-new' && 'Girls\' Hostel - New Building'}
+              {view === 'girls-old' && 'Girls\' Hostel - Old Building'}
+              {view === 'boys' && 'Boys\' Hostel'}
             </h2>
             <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
               <h3 className="text-2xl font-bold text-blue-900 mb-4">Instructions</h3>
               <p className="text-gray-600">
                 {view === 'girls-new'
                   ? 'Every room in the New Building has an attached washroom, bathroom, and balcony. Each room accommodates 2 members.'
-                  : 'Every room in the Old Building has an attached washroom and bathroom but no balcony. Each room accommodates 2 members.'}
+                  : view === 'girls-old'
+                  ? 'Every room in the Old Building has an attached washroom and bathroom but no balcony. Each room accommodates 2 members.'
+                  : 'Every room in the Boys\' Hostel has an attached washroom and bathroom but no balcony. Each room accommodates 2 members.'}
               </p>
               <p className="text-gray-600 mt-2">
                 Rent: ₹{view === 'girls-new' ? '8000' : '7000'} per person per month. Annual rent: ₹{view === 'girls-new' ? '96000' : '84000'} per person.
               </p>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-              <h3 className="text-2xl font-bold text-blue-900 mb-4">Building Layout</h3>
-              <p className="text-gray-600 mb-4">
-                The building has 6 floors, with 8 rooms per floor. All rooms have a capacity of 2 members.
-              </p>
-              <div className="flex space-x-4 mb-4">
-                {[1, 2, 3, 4, 5, 6].map((floor) => (
-                  <button
-                    key={floor}
-                    onClick={() => setSelectedFloor(floor)}
-                    className={`px-4 py-2 rounded-lg ${selectedFloor === floor ? 'bg-blue-900 text-white' : 'bg-gray-200 text-blue-900'}`}
-                  >
-                    Floor {floor}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {rooms.map((room) => (
-                  <div
-                    key={room.id}
-                    className={`border rounded-lg p-4 shadow-md ${hasVacancy(room) ? 'bg-green-100' : 'bg-red-100'}`}
-                  >
-                    <h4 className="text-lg font-semibold text-blue-900">Room {room.room_number}</h4>
-                    <p className="text-gray-600">Capacity: 2 Members</p>
-                    <div className="mt-2">
-                      <div className="flex justify-between items-center mb-2">
-                        <span>Member 1:</span>
-                        {room.member1_id ? (
-                          <div className="flex items-center space-x-2">
-                            <span className="text-blue-900">{room.member1_name}</span>
-                            <button
-                              onClick={() => handleRemoveStudent(room.id, 'member1')}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setSelectedRoom(room);
-                              setSelectedMember('member1');
-                            }}
-                            className="text-blue-900 hover:underline"
-                          >
-                            Assign
-                          </button>
-                        )}
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Member 2:</span>
-                        {room.member2_id ? (
-                          <div className="flex items-center space-x-2">
-                            <span className="text-blue-900">{room.member2_name}</span>
-                            <button
-                              onClick={() => handleRemoveStudent(room.id, 'member2')}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setSelectedRoom(room);
-                              setSelectedMember('member2');
-                            }}
-                            className="text-blue-900 hover:underline"
-                          >
-                            Assign
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {selectedRoom && selectedMember && (
+            {/* Add Image Cards */}
+            {(view === 'girls-new') && (
               <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-                <h3 className="text-2xl font-bold text-blue-900 mb-4">
-                  Assign Student to Room {selectedRoom.room_number} ({selectedMember === 'member1' ? 'Member 1' : 'Member 2'})
-                </h3>
-                <div className="mb-4">
-                  <label className="block text-blue-900 font-medium mb-2">Select Student</label>
-                  <select
-                    value={selectedStudent}
-                    onChange={(e) => setSelectedStudent(e.target.value)}
-                    className="input-field"
-                  >
-                    <option value="">Select a student</option>
-                    {students.map((student) => (
-                      <option key={student.id} value={student.id}>
-                        {student.name} (ID: {student.id})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex space-x-4">
-                  <button
-                    onClick={handleAssignStudent}
-                    className="bg-blue-900 text-white px-4 py-2 rounded-lg"
-                  >
-                    Assign Student
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedRoom(null);
-                      setSelectedMember(null);
-                      setSelectedStudent('');
-                    }}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Cancel
-                  </button>
+                <h3 className="text-2xl font-bold text-blue-900 mb-4">Room Images</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <img src={roomWithBalcony1} alt="Room 1 - New Building" className="rounded-lg" />
+                  <img src={roomWithBalcony2} alt="Room 2 - New Building" className="rounded-lg" />
                 </div>
               </div>
             )}
-          </div>
-        )}
-
-        {view === 'boys' && (
-          <div className="max-w-5xl mx-auto">
-            <h2 className="section-title">Boys' Hostel</h2>
-            <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
-              <h3 className="text-2xl font-bold text-blue-900 mb-4">Instructions</h3>
-              <p className="text-gray-600">
-                Every room in the Boys' Hostel has an attached washroom and bathroom but no balcony. Each room accommodates 2 members.
-              </p>
-              <p className="text-gray-600 mt-2">
-                Rent: ₹7000 per person per month. Annual rent: ₹84000 per person.
-              </p>
-            </div>
+            {(view === 'girls-old') && (
+              <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
+                <h3 className="text-2xl font-bold text-blue-900 mb-4">Room Images</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <img src={roomWithoutBalcony1} alt="Room 1 - Old Building" className="rounded-lg" />
+                  <img src={roomWithoutBalcony2} alt="Room 2 - Old Building" className="rounded-lg" />
+                </div>
+              </div>
+            )}
+            {(view === 'boys') && (
+              <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
+                <h3 className="text-2xl font-bold text-blue-900 mb-4">Room Images</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <img src={boys1} alt="Room 1 - Boys' Hostel" className="rounded-lg" />
+                  <img src={boys2} alt="Room 2 - Boys' Hostel" className="rounded-lg" />
+                </div>
+              </div>
+            )}
 
             <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
               <h3 className="text-2xl font-bold text-blue-900 mb-4">Building Layout</h3>
