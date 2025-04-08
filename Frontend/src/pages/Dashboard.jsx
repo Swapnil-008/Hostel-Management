@@ -16,7 +16,7 @@ const Dashboard = () => {
       <Header />
       <main className="flex-grow py-16 bg-blue-50">
         <h2 className="section-title">Student Dashboard</h2>
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
             <h3 className="text-2xl font-bold text-blue-900 mb-6">Welcome, {user.name}</h3>
             <p className="text-gray-600 mb-4">
