@@ -76,16 +76,18 @@ const AdminRoomAllocation = () => {
 
       // Update the student's room_number
       const student = students.find(s => s.id === parseInt(selectedStudent));
+      const roomNumber = `${selectedRoom.hostel_type} ${selectedRoom.building_type || ''} Room ${selectedRoom.room_number}`.trim();
       await axios.put(`http://localhost:5000/api/students/${selectedStudent}`, {
-        room_number: `${selectedRoom.hostel_type} ${selectedRoom.building_type || ''} Room ${selectedRoom.room_number}`
+        room_number: roomNumber
       });
 
       // Notify the student
       await axios.post('http://localhost:5000/api/notifications/send', {
-        student_id: selectedStudent,
-        message: `You have been assigned to ${selectedRoom.hostel_type} ${selectedRoom.building_type || ''} Room ${selectedRoom.room_number}.`,
         admin_id: user.id,
-        notification_type: 'Room Assignment'
+        message: `You have been assigned to ${roomNumber} by admin ${user.username}.`,
+        notification_type: 'Room Assignment',
+        student_id: selectedStudent,
+        student_email: student.email // Include student's email from fetched data
       });
 
       alert(`Student assigned successfully! The student has been notified.`);
@@ -98,6 +100,7 @@ const AdminRoomAllocation = () => {
         selectedFloor
       );
     } catch (err) {
+      console.error('Error assigning student:', err);
       alert(err.response?.data?.error || 'Failed to assign student');
     }
   };
@@ -105,6 +108,8 @@ const AdminRoomAllocation = () => {
   const handleRemoveStudent = async (roomId, member) => {
     try {
       const room = rooms.find(r => r.id === roomId);
+      const studentId = member === 'member1' ? room.member1_id : room.member2_id;
+      const student = students.find(s => s.id === studentId);
       const updatedRoom = {
         member1_id: member === 'member1' ? null : room.member1_id,
         member2_id: member === 'member2' ? null : room.member2_id
@@ -112,17 +117,18 @@ const AdminRoomAllocation = () => {
       await axios.put(`http://localhost:5000/api/rooms/update/${roomId}`, updatedRoom);
 
       // Update the student's room_number to null
-      const studentId = member === 'member1' ? room.member1_id : room.member2_id;
       await axios.put(`http://localhost:5000/api/students/${studentId}`, {
         room_number: null
       });
 
       // Notify the student
+      const roomNumber = `${room.hostel_type} ${room.building_type || ''} Room ${room.room_number}`.trim();
       await axios.post('http://localhost:5000/api/notifications/send', {
-        student_id: studentId,
-        message: `You have been removed from ${room.hostel_type} ${room.building_type || ''} Room ${room.room_number}.`,
         admin_id: user.id,
-        notification_type: 'Room Removal'
+        message: `You have been removed from ${roomNumber} by admin ${user.username}.`,
+        notification_type: 'Room Removal',
+        student_id: studentId,
+        student_email: student ? student.email : null // Include email if available
       });
 
       alert('Student removed successfully! The student has been notified.');
@@ -132,6 +138,7 @@ const AdminRoomAllocation = () => {
         selectedFloor
       );
     } catch (err) {
+      console.error('Error removing student:', err);
       alert(err.response?.data?.error || 'Failed to remove student');
     }
   };
@@ -209,7 +216,6 @@ const AdminRoomAllocation = () => {
               </p>
             </div>
 
-            {/* Add Image Cards */}
             {(view === 'girls-new') && (
               <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
                 <h3 className="text-2xl font-bold text-blue-900 mb-4">Room Images</h3>
@@ -256,65 +262,69 @@ const AdminRoomAllocation = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {rooms.map((room) => (
-                  <div
-                    key={room.id}
-                    className={`border rounded-lg p-4 shadow-md ${hasVacancy(room) ? 'bg-green-100' : 'bg-red-100'}`}
-                  >
-                    <h4 className="text-lg font-semibold text-blue-900">Room {room.room_number}</h4>
-                    <p className="text-gray-600">Capacity: 2 Members</p>
-                    <div className="mt-2">
-                      <div className="flex justify-between items-center mb-2">
-                        <span>Member 1:</span>
-                        {room.member1_id ? (
-                          <div className="flex items-center space-x-2">
-                            <span className="text-blue-900">{room.member1_name}</span>
+                {rooms.length > 0 ? (
+                  rooms.map((room) => (
+                    <div
+                      key={room.id}
+                      className={`border rounded-lg p-4 shadow-md ${hasVacancy(room) ? 'bg-green-100' : 'bg-red-100'}`}
+                    >
+                      <h4 className="text-lg font-semibold text-blue-900">Room {room.room_number}</h4>
+                      <p className="text-gray-600">Capacity: 2 Members</p>
+                      <div className="mt-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <span>Member 1:</span>
+                          {room.member1_id ? (
+                            <div className="flex items-center space-x-2">
+                              <span className="text-blue-900">{room.member1_name}</span>
+                              <button
+                                onClick={() => handleRemoveStudent(room.id, 'member1')}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ) : (
                             <button
-                              onClick={() => handleRemoveStudent(room.id, 'member1')}
-                              className="text-red-500 hover:text-red-700"
+                              onClick={() => {
+                                setSelectedRoom(room);
+                                setSelectedMember('member1');
+                              }}
+                              className="text-blue-900 hover:underline"
                             >
-                              Remove
+                              Assign
                             </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setSelectedRoom(room);
-                              setSelectedMember('member1');
-                            }}
-                            className="text-blue-900 hover:underline"
-                          >
-                            Assign
-                          </button>
-                        )}
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Member 2:</span>
-                        {room.member2_id ? (
-                          <div className="flex items-center space-x-2">
-                            <span className="text-blue-900">{room.member2_name}</span>
+                          )}
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Member 2:</span>
+                          {room.member2_id ? (
+                            <div className="flex items-center space-x-2">
+                              <span className="text-blue-900">{room.member2_name}</span>
+                              <button
+                                onClick={() => handleRemoveStudent(room.id, 'member2')}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ) : (
                             <button
-                              onClick={() => handleRemoveStudent(room.id, 'member2')}
-                              className="text-red-500 hover:text-red-700"
+                              onClick={() => {
+                                setSelectedRoom(room);
+                                setSelectedMember('member2');
+                              }}
+                              className="text-blue-900 hover:underline"
                             >
-                              Remove
+                              Assign
                             </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setSelectedRoom(room);
-                              setSelectedMember('member2');
-                            }}
-                            className="text-blue-900 hover:underline"
-                          >
-                            Assign
-                          </button>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="col-span-full text-center text-gray-600">No rooms available for this selection.</p>
+                )}
               </div>
             </div>
 
@@ -328,7 +338,7 @@ const AdminRoomAllocation = () => {
                   <select
                     value={selectedStudent}
                     onChange={(e) => setSelectedStudent(e.target.value)}
-                    className="input-field"
+                    className="border p-2 rounded w-full"
                   >
                     <option value="">Select a student</option>
                     {students.map((student) => (
