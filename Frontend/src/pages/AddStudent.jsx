@@ -9,16 +9,15 @@ const AddStudent = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // Redirect if not an admin
   if (!user || !user.username) {
     navigate('/');
     return null;
   }
 
-  // Check for email in URL params (e.g., from notification link)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const emailParam = params.get('email');
@@ -29,16 +28,19 @@ const AddStudent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      await axios.post('http://localhost:5000/api/students', {
+      const res = await axios.post('http://localhost:5000/api/students', {
         name,
         email,
-        password
+        password,
+        admin_id: user.id,
+        admin_name: user.username,
       });
       alert('Student created successfully!');
       navigate('/admin-dashboard');
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to create student');
+      setError(err.response?.data?.error || 'Failed to create student');
     }
   };
 
@@ -48,6 +50,9 @@ const AddStudent = () => {
       <main className="flex-grow flex items-center justify-center bg-blue-50">
         <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
           <h2 className="text-2xl font-bold text-blue-900 mb-6 text-center">Add New Student</h2>
+          {error && (
+            <p className="text-red-500 mb-4 text-center">{error}</p>
+          )}
           <form onSubmit={handleSubmit}>
             <div className="mb-4 relative">
               <label className="block text-blue-900 font-medium mb-2">Name</label>

@@ -124,10 +124,10 @@ CREATE TABLE notifications (
 
 CREATE TABLE rooms (
     id INT NOT NULL AUTO_INCREMENT,
-    hostel_type VARCHAR(10) NOT NULL,
+    hostel_type VARCHAR(50) NOT NULL,
     building_type VARCHAR(10),
     floor INT NOT NULL,
-    room_number VARCHAR(10) NOT NULL,
+    room_number VARCHAR(50) NOT NULL,
     capacity INT NOT NULL DEFAULT 2,
     has_washroom TINYINT(1) DEFAULT 1,
     has_bathroom TINYINT(1) DEFAULT 1,
@@ -137,24 +137,43 @@ CREATE TABLE rooms (
     member1_id INT,
     member2_id INT,
     PRIMARY KEY (id),
+    UNIQUE (room_number),
+    UNIQUE KEY unique_room_combo (hostel_type, building_type, floor, room_number), -- Optional composite uniqueness
     FOREIGN KEY (member1_id) REFERENCES students(id) ON DELETE SET NULL,
-    FOREIGN KEY (member2_id) REFERENCES students(id) ON DELETE SET NULL,
-    INDEX idx_member1_id (member1_id),
-    INDEX idx_member2_id (member2_id)
+    FOREIGN KEY (member2_id) REFERENCES students(id) ON DELETE SET NULL
 );
 
 CREATE TABLE reservations (
     id INT NOT NULL AUTO_INCREMENT,
     room_id INT NOT NULL,
-    reserved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending',
-    user_name VARCHAR(100) NOT NULL,
-    user_email VARCHAR(100) NOT NULL,
-    user_phone VARCHAR(15) NOT NULL,
+    student_name VARCHAR(100) NOT NULL,
+    student_email VARCHAR(100) NOT NULL,
+    user_phone VARCHAR(20) NOT NULL, -- Added to match backend requirements
+    hostel_type VARCHAR(50) NOT NULL,
+    building_type VARCHAR(10),
+    floor INT NOT NULL,
+    room_number VARCHAR(50) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    order_id VARCHAR(100),
+    payment_id VARCHAR(100),
+    status ENUM('pending', 'completed') NOT NULL DEFAULT 'pending',
+    reserved_at DATETIME NOT NULL, -- Renamed from created_at for clarity
+    expires_at DATETIME NOT NULL,  -- Renamed from expiry_time
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
-    INDEX idx_room_id (room_id)
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+);
+
+CREATE TABLE payments (
+    id INT NOT NULL AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    order_id VARCHAR(100) NOT NULL,
+    payment_id VARCHAR(100),
+    amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 );
 
 -- Hostel Doctors Table
@@ -183,6 +202,15 @@ CREATE TABLE hostel_images (
     id INT NOT NULL AUTO_INCREMENT,
     image_url VARCHAR(255) NOT NULL,
     caption VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE superadmins (
+    id INT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );

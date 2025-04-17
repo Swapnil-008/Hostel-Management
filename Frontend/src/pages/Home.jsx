@@ -1,25 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaBed, FaUserFriends } from 'react-icons/fa';
+import Header from '../components/Header'; // Import reusable Header
+import Footer from '../components/Footer'; // Import reusable Footer
 
 const Home = () => {
   return (
     <div className="min-h-screen flex flex-col bg-blue-50">
-      <header className="bg-blue-900 text-white py-4 shadow-lg">
-        <div className="max-w-6xl mx-auto flex justify-between items-center px-4">
-          <Link to="/" className="text-2xl font-bold">
-            Hostel Management
-          </Link>
-          <nav className="space-x-4">
-            <Link to="/login/admin" className="hover:text-blue-300 transition-colors duration-300">
-              Admin Login
-            </Link>
-            <Link to="/login/student" className="hover:text-blue-300 transition-colors duration-300">
-              Student Login
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header /> {/* Replace hardcoded header */}
       <main className="flex-grow py-16">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-blue-900 mb-6">Welcome to Hostel Management</h2>
@@ -52,11 +40,7 @@ const Home = () => {
           </div>
         </div>
       </main>
-      <footer className="bg-blue-900 text-white py-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <p>© 2025 Hostel Management. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer /> {/* Replace hardcoded footer */}
     </div>
   );
 };

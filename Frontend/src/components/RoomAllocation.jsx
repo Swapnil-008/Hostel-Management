@@ -215,6 +215,8 @@ const RoomAllocation = () => {
               const confirmRes = await axios.post('http://localhost:5000/api/rooms/confirm-payment', {
                 reservation_id: reservation.reservation_id,
                 user_name: userName,
+                user_email: userEmail,
+                user_phone: userPhone,
                 payment_id: response.razorpay_payment_id,
               });
 
@@ -232,7 +234,7 @@ const RoomAllocation = () => {
             console.error('Payment verification failed:', verifyErr);
             setError('Payment verification failed. Please contact support with your payment details.');
           } finally {
-            setLoading(false); // Ensure loading stops after payment attempt
+            setLoading(false);
           }
         },
         prefill: { name: userName, email: userEmail, contact: userPhone },

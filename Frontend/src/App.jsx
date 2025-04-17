@@ -19,6 +19,10 @@ import AdminRoomAllocation from './pages/AdminRoomAllocation';
 import SendNotification from './pages/SendNotification'; // New
 import AddStudent from './pages/AddStudent';
 import Payment from './components/Payment';
+import SuperadminLogin from './pages/SuperadminLogin';
+import SuperadminDashboard from './pages/SuperadminDashboard';
+import SuperadminCommunity from './pages/SuperadminCommunity';
+
 function App() {
   return (
     <Router>
@@ -44,6 +48,9 @@ function App() {
           <Route path="/send-notification" element={<SendNotification />} /> {/* New */}
           <Route path="/add-student" element={<AddStudent />} />
           <Route path="/payment" component={Payment} />
+          <Route path="/login/superadmin" element={<SuperadminLogin />} />
+          <Route path="/superadmin-dashboard" element={<SuperadminDashboard />} />
+          <Route path="/superadmin/community" element={<SuperadminCommunity />} />
         </Routes>
       </div>
     </Router>

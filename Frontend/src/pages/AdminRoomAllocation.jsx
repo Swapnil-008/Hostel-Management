@@ -12,19 +12,29 @@ import boys1 from '../assets/boys_room1.png';
 import boys2 from '../assets/boys_room2.png';
 
 const AdminRoomAllocation = () => {
-  const [view, setView] = useState('hostels'); // 'hostels', 'girls', 'boys', 'girls-new', 'girls-old'
+  const [view, setView] = useState('hostels');
   const [rooms, setRooms] = useState([]);
   const [selectedFloor, setSelectedFloor] = useState(1);
   const [students, setStudents] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedMember, setSelectedMember] = useState(null); // 'member1' or 'member2'
+  const [selectedMember, setSelectedMember] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState('');
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // Redirect if not an admin
   if (!user || !user.username) {
     return <Navigate to="/" />;
   }
+
+  const fetchStudents = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/students');
+      console.log('Fetched students:', res.data);
+      setStudents(res.data);
+    } catch (err) {
+      console.error('Error fetching students:', err);
+      alert('Failed to fetch students.');
+    }
+  };
 
   useEffect(() => {
     if (view === 'girls-new' || view === 'girls-old') {
@@ -35,14 +45,6 @@ const AdminRoomAllocation = () => {
   }, [view, selectedFloor]);
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/students');
-        setStudents(res.data);
-      } catch (err) {
-        console.error('Error fetching students:', err);
-      }
-    };
     fetchStudents();
   }, []);
 
@@ -68,27 +70,41 @@ const AdminRoomAllocation = () => {
     }
 
     try {
+      const student = students.find(s => s.id === parseInt(selectedStudent));
+      if (!student) {
+        throw new Error(`Student with id ${selectedStudent} not found`);
+      }
+      if (student.room_number) {
+        alert(`This student is already assigned to ${student.room_number}. Please remove them first.`);
+        return;
+      }
+
+      console.log(`Assigning student id ${selectedStudent} to room ${selectedRoom.room_number}, slot ${selectedMember}`);
+
       const updatedRoom = {
         member1_id: selectedMember === 'member1' ? parseInt(selectedStudent) : selectedRoom.member1_id,
         member2_id: selectedMember === 'member2' ? parseInt(selectedStudent) : selectedRoom.member2_id
       };
       await axios.put(`http://localhost:5000/api/rooms/update/${selectedRoom.id}`, updatedRoom);
 
-      // Update the student's room_number
-      const student = students.find(s => s.id === parseInt(selectedStudent));
       const roomNumber = `${selectedRoom.hostel_type} ${selectedRoom.building_type || ''} Room ${selectedRoom.room_number}`.trim();
       await axios.put(`http://localhost:5000/api/students/${selectedStudent}`, {
         room_number: roomNumber
       });
 
-      // Notify the student
       await axios.post('http://localhost:5000/api/notifications/send', {
         admin_id: user.id,
         message: `You have been assigned to ${roomNumber} by admin ${user.username}.`,
         notification_type: 'Room Assignment',
         student_id: selectedStudent,
-        student_email: student.email // Include student's email from fetched data
+        student_email: student.email
       });
+
+      setStudents(prev =>
+        prev.map(s =>
+          s.id === parseInt(selectedStudent) ? { ...s, room_number: roomNumber } : s
+        )
+      );
 
       alert(`Student assigned successfully! The student has been notified.`);
       setSelectedRoom(null);
@@ -101,35 +117,47 @@ const AdminRoomAllocation = () => {
       );
     } catch (err) {
       console.error('Error assigning student:', err);
-      alert(err.response?.data?.error || 'Failed to assign student');
+      alert(err.response?.data?.error || err.message || 'Failed to assign student.');
     }
   };
 
   const handleRemoveStudent = async (roomId, member) => {
     try {
       const room = rooms.find(r => r.id === roomId);
+      if (!room) {
+        throw new Error('Room not found');
+      }
       const studentId = member === 'member1' ? room.member1_id : room.member2_id;
+      if (!studentId) {
+        throw new Error('No student assigned to this slot');
+      }
       const student = students.find(s => s.id === studentId);
+      if (!student) {
+        throw new Error(`Student with id ${studentId} not found`);
+      }
+
+      console.log(`Removing student id ${studentId} from room ${room.room_number}`);
+
       const updatedRoom = {
         member1_id: member === 'member1' ? null : room.member1_id,
         member2_id: member === 'member2' ? null : room.member2_id
       };
       await axios.put(`http://localhost:5000/api/rooms/update/${roomId}`, updatedRoom);
 
-      // Update the student's room_number to null
-      await axios.put(`http://localhost:5000/api/students/${studentId}`, {
-        room_number: null
-      });
-
-      // Notify the student
       const roomNumber = `${room.hostel_type} ${room.building_type || ''} Room ${room.room_number}`.trim();
       await axios.post('http://localhost:5000/api/notifications/send', {
         admin_id: user.id,
         message: `You have been removed from ${roomNumber} by admin ${user.username}.`,
         notification_type: 'Room Removal',
         student_id: studentId,
-        student_email: student ? student.email : null // Include email if available
+        student_email: student.email
       });
+
+      setStudents(prev =>
+        prev.map(s =>
+          s.id === studentId ? { ...s, room_number: null } : s
+        )
+      );
 
       alert('Student removed successfully! The student has been notified.');
       fetchRooms(
@@ -139,7 +167,7 @@ const AdminRoomAllocation = () => {
       );
     } catch (err) {
       console.error('Error removing student:', err);
-      alert(err.response?.data?.error || 'Failed to remove student');
+      alert(err.response?.data?.error || err.message || 'Failed to remove student.');
     }
   };
 
@@ -216,7 +244,7 @@ const AdminRoomAllocation = () => {
               </p>
             </div>
 
-            {(view === 'girls-new') && (
+            {view === 'girls-new' && (
               <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
                 <h3 className="text-2xl font-bold text-blue-900 mb-4">Room Images</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -225,7 +253,7 @@ const AdminRoomAllocation = () => {
                 </div>
               </div>
             )}
-            {(view === 'girls-old') && (
+            {view === 'girls-old' && (
               <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
                 <h3 className="text-2xl font-bold text-blue-900 mb-4">Room Images</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -234,7 +262,7 @@ const AdminRoomAllocation = () => {
                 </div>
               </div>
             )}
-            {(view === 'boys') && (
+            {view === 'boys' && (
               <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
                 <h3 className="text-2xl font-bold text-blue-900 mb-4">Room Images</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

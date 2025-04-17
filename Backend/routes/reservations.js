@@ -3,11 +3,11 @@ const router = express.Router();
 const db = require('../config/db');
 
 router.post('/', async (req, res) => {
-  const { student_name, student_email, hostel_type, building_type, floor, room_number, amount, expires_at } = req.body;
+  const { student_name, student_email, user_phone, hostel_type, building_type, floor, room_number, amount, expires_at } = req.body;
   console.log('Received reservation request:', req.body);
 
-  if (!student_name || !student_email || !hostel_type || !room_number || !amount || !expires_at) {
-    return res.status(400).json({ error: 'All required fields (student_name, student_email, hostel_type, room_number, amount, expires_at) are required' });
+  if (!student_name || !student_email || !user_phone || !hostel_type || !room_number || !amount || !expires_at) {
+    return res.status(400).json({ error: 'All required fields (student_name, student_email, user_phone, hostel_type, room_number, amount, expires_at) are required' });
   }
 
   try {
@@ -30,13 +30,14 @@ router.post('/', async (req, res) => {
     }
 
     const [result] = await db.query(
-      'INSERT INTO reservations (student_name, student_email, hostel_type, building_type, floor, room_number, amount, expires_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [student_name, student_email, hostel_type, building_type || null, floor, room_number, amount, expires_at, 'pending']
+      'INSERT INTO reservations (student_name, student_email, user_phone, hostel_type, building_type, floor, room_number, amount, expires_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [student_name, student_email, user_phone, hostel_type, building_type || null, floor, room_number, amount, expires_at, 'pending']
     );
     const reservation = {
       id: result.insertId,
       student_name,
       student_email,
+      user_phone,
       hostel_type,
       building_type,
       floor,
@@ -54,7 +55,7 @@ router.post('/', async (req, res) => {
 
 router.put('/:reservation_id', async (req, res) => {
   const { reservation_id } = req.params;
-  const { payment_id, status } = req.body;
+  const { payment_id, status, student_name, student_email, user_phone } = req.body;
   try {
     const [result] = await db.query(
       'UPDATE reservations SET payment_id = ?, status = ? WHERE id = ?',
@@ -64,30 +65,54 @@ router.put('/:reservation_id', async (req, res) => {
       return res.status(404).json({ error: 'Reservation not found' });
     }
 
-    const [reservation] = await db.query('SELECT * FROM reservations WHERE id = ?', [reservation_id]);
-    const [room] = await db.query('SELECT * FROM rooms WHERE room_number = ?', [reservation[0].room_number]);
+    if (status === 'completed') {
+      const [reservation] = await db.query('SELECT * FROM reservations WHERE id = ?', [reservation_id]);
+      const [room] = await db.query('SELECT * FROM rooms WHERE room_number = ?', [reservation[0].room_number]);
 
-    if (status === 'completed' && !room[0].member1_id) {
-      await db.query('UPDATE rooms SET member1_id = (SELECT id FROM students WHERE email = ?) WHERE room_number = ?', [
-        reservation[0].student_email,
-        room[0].room_number,
+      let studentId = null;
+      const [existingStudent] = await db.query('SELECT id, password FROM students WHERE email = ?', [student_email]);
+      if (existingStudent.length > 0) {
+        if (existingStudent[0].password) {
+          return res.status(400).json({ error: 'Student credentials already exist' });
+        }
+        studentId = existingStudent[0].id;
+      } else {
+        const [studentResult] = await db.query(
+          'INSERT INTO students (name, email, room_number) VALUES (?, ?, ?)',
+          [
+            student_name,
+            student_email,
+            `${room[0].hostel_type} ${room[0].building_type || ''} Room ${room[0].room_number}`,
+          ]
+        );
+        studentId = studentResult.insertId;
+      }
+
+      if (!room[0].member1_id) {
+        await db.query('UPDATE rooms SET member1_id = ? WHERE room_number = ?', [studentId, room[0].room_number]);
+      } else if (!room[0].member2_id) {
+        await db.query('UPDATE rooms SET member2_id = ? WHERE room_number = ?', [studentId, room[0].room_number]);
+      }
+
+      await db.query('UPDATE students SET room_number = ? WHERE id = ?', [
+        `${room[0].hostel_type} ${room[0].building_type || ''} Room ${room[0].room_number}`,
+        studentId,
       ]);
-    } else if (status === 'completed' && !room[0].member2_id) {
-      await db.query('UPDATE rooms SET member2_id = (SELECT id FROM students WHERE email = ?) WHERE room_number = ?', [
-        reservation[0].student_email,
-        room[0].room_number,
-      ]);
+
+      // Notify all admins
+      const [admins] = await db.query('SELECT id FROM admins');
+      for (const admin of admins) {
+        await db.query(
+          'INSERT INTO notifications (admin_id, message, admin_name, notification_type) VALUES (?, ?, ?, ?)',
+          [
+            admin.id,
+            `${student_name} completed their payment (${student_email}, ${user_phone}) for ${room[0].hostel_type} ${room[0].building_type || ''} Room ${room[0].room_number}.`,
+            'System',
+            'Payment Completion',
+          ]
+        );
+      }
     }
-
-    await db.query(
-      'INSERT INTO notifications (message, notification_type, recipient_email, created_at) VALUES (?, ?, ?, ?)',
-      [
-        `Student ${reservation[0].student_name} (${reservation[0].student_email}) has completed payment for Room ${room[0].room_number}. Please create their credentials.`,
-        'admin',
-        'admin@example.com',
-        new Date(),
-      ]
-    );
 
     res.json({ success: true, message: 'Reservation updated' });
   } catch (err) {

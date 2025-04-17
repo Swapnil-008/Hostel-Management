@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const Razorpay = require('razorpay');
 const dotenv = require('dotenv');
+const db = require('./config/db'); // Ensure this is correct
 const complaintRoutes = require('./routes/complaints');
 const leaveRoutes = require('./routes/leaves');
 const authRoutes = require('./routes/auth');
@@ -15,6 +16,7 @@ const adminRoutes = require('./routes/admins');
 const hostelDoctorsRoutes = require('./routes/hostelDoctors');
 const hostelRulesRoutes = require('./routes/hostelRules');
 const hostelImagesRoutes = require('./routes/hostelImages');
+const superadminRoutes = require('./routes/superadmins');
 
 dotenv.config();
 
@@ -41,15 +43,24 @@ app.use('/api/admins', adminRoutes);
 app.use('/api/hostel-doctors', hostelDoctorsRoutes);
 app.use('/api/hostel-rules', hostelRulesRoutes);
 app.use('/api/hostel-images', hostelImagesRoutes);
+app.use('/api/superadmins', superadminRoutes);
+
+app.get('/api/payments', async (req, res) => {
+  try {
+    console.log('GET /api/payments hit');
+    const [rows] = await db.query('SELECT * FROM payments');
+    console.log('Payments data:', rows);
+    res.json(rows);
+  } catch (err) {
+    console.error('Payments fetch error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.post('/api/payments/order', async (req, res) => {
   const { amount, currency = 'INR', receipt = 'receipt_' + Date.now() } = req.body;
   try {
-    const options = {
-      amount: amount * 100,
-      currency,
-      receipt,
-    };
+    const options = { amount: amount * 100, currency, receipt };
     const order = await razorpay.orders.create(options);
     res.json(order);
   } catch (error) {

@@ -51,6 +51,7 @@ router.get('/check-reservation/:room_id', async (req, res) => {
 
 router.post('/reserve', async (req, res) => {
   const { room_id, user_name, user_email, user_phone } = req.body;
+  console.log('Reserve request:', { room_id, user_name, user_email, user_phone });
   if (!room_id || !user_name || !user_email || !user_phone) {
     return res.status(400).json({ error: 'All fields are required' });
   }
@@ -105,12 +106,14 @@ router.post('/reserve', async (req, res) => {
 });
 
 router.post('/confirm-payment', async (req, res) => {
-  const { reservation_id, user_name, payment_id } = req.body;
+  const { reservation_id, user_name, user_email, user_phone, payment_id } = req.body;
+  console.log('Confirm payment request:', { reservation_id, user_name, user_email, user_phone, payment_id });
   try {
     const [reservation] = await db.query(
       'SELECT * FROM reservations WHERE id = ? AND student_name = ? AND status = "pending"',
       [reservation_id, user_name]
     );
+    console.log('Reservation data:', reservation[0]);
     if (reservation.length === 0) {
       return res.status(400).json({ error: 'Invalid or expired reservation' });
     }
@@ -126,13 +129,23 @@ router.post('/confirm-payment', async (req, res) => {
       return res.status(400).json({ error: 'Room is no longer available' });
     }
     let studentId = null;
-    const [existingStudent] = await db.query('SELECT id FROM students WHERE email = ?', [reservation[0].student_email]);
+    const [existingStudent] = await db.query('SELECT id, password, room_number FROM students WHERE email = ?', [reservation[0].student_email]);
     if (existingStudent.length > 0) {
+      if (existingStudent[0].password) {
+        return res.status(400).json({ error: 'Student credentials already exist' });
+      }
+      if (existingStudent[0].room_number) {
+        return res.status(400).json({ error: `Student is already assigned to ${existingStudent[0].room_number}` });
+      }
       studentId = existingStudent[0].id;
     } else {
       const [studentResult] = await db.query(
-        'INSERT INTO students (name, email, password) VALUES (?, ?, ?)',
-        [user_name, reservation[0].student_email, require('bcrypt').hashSync('default_password', 10)]
+        'INSERT INTO students (name, email, room_number, password) VALUES (?, ?, ?, NULL)',
+        [
+          user_name,
+          reservation[0].student_email,
+          `${room[0].hostel_type} ${room[0].building_type || ''} Room ${room[0].room_number}`,
+        ]
       );
       studentId = studentResult.insertId;
     }
@@ -147,19 +160,22 @@ router.post('/confirm-payment', async (req, res) => {
       [studentId, payment_id, reservation[0].amount, 'completed']
     );
     await db.query('DELETE FROM reservations WHERE id = ?', [reservation_id]);
-    const [admins] = await db.query('SELECT id FROM admins LIMIT 1');
-    if (admins.length > 0) {
+
+    const phoneNumber = user_phone ?? reservation[0].user_phone ?? 'N/A';
+    console.log('Phone number used:', phoneNumber);
+    const [admins] = await db.query('SELECT id FROM admins');
+    for (const admin of admins) {
       await db.query(
-        'INSERT INTO notifications (admin_id, message, notification_type) VALUES (?, ?, ?)',
+        'INSERT INTO notifications (admin_id, message, admin_name, notification_type) VALUES (?, ?, ?, ?)',
         [
-          admins[0].id,
-          `Student ${user_name} (${reservation[0].student_email}, ${reservation[0].user_phone}) has completed payment for ${room[0].hostel_type} ${room[0].building_type || ''} Room ${room[0].room_number}. Please create their credentials.`,
-          'Room Allocation',
+          admin.id,
+          `${user_name} completed their payment (${reservation[0].student_email}, ${phoneNumber}) for ${room[0].hostel_type} ${room[0].building_type || ''} Room ${room[0].room_number}.`,
+          'System',
+          'Payment Completion',
         ]
       );
-    } else {
-      console.warn('No admins found; notification not sent.');
     }
+
     res.json({ message: 'Payment successful! Admin will create your credentials soon.' });
   } catch (err) {
     console.error('Error confirming payment:', err);
@@ -185,15 +201,46 @@ router.post('/cancel-reservation', async (req, res) => {
   }
 });
 
-// New route to update room members
 router.put('/update/:id', async (req, res) => {
   const { id } = req.params;
   const { member1_id, member2_id } = req.body;
   try {
     const [room] = await db.query('SELECT * FROM rooms WHERE id = ?', [id]);
     if (room.length === 0) {
+      console.error(`Room with id ${id} not found`);
       return res.status(404).json({ error: 'Room not found' });
     }
+
+    if (member1_id !== undefined && member1_id !== null) {
+      const [existingRoom1] = await db.query(
+        'SELECT id, room_number FROM rooms WHERE (member1_id = ? OR member2_id = ?) AND id != ?',
+        [member1_id, member1_id, id]
+      );
+      if (existingRoom1.length > 0) {
+        return res.status(400).json({
+          error: `Student is already assigned to ${existingRoom1[0].room_number}. Remove them first.`
+        });
+      }
+    }
+    if (member2_id !== undefined && member2_id !== null) {
+      const [existingRoom2] = await db.query(
+        'SELECT id, room_number FROM rooms WHERE (member1_id = ? OR member2_id = ?) AND id != ?',
+        [member2_id, member2_id, id]
+      );
+      if (existingRoom2.length > 0) {
+        return res.status(400).json({
+          error: `Student is already assigned to ${existingRoom2[0].room_number}. Remove them first.`
+        });
+      }
+    }
+
+    if (room[0].member1_id && member1_id === null) {
+      await db.query('UPDATE students SET room_number = NULL WHERE id = ?', [room[0].member1_id]);
+    }
+    if (room[0].member2_id && member2_id === null) {
+      await db.query('UPDATE students SET room_number = NULL WHERE id = ?', [room[0].member2_id]);
+    }
+
     const [result] = await db.query(
       'UPDATE rooms SET member1_id = ?, member2_id = ? WHERE id = ?',
       [member1_id !== undefined ? member1_id : room[0].member1_id, 
@@ -201,11 +248,12 @@ router.put('/update/:id', async (req, res) => {
        id]
     );
     if (result.affectedRows === 0) {
+      console.error(`No changes made to room id ${id}`);
       return res.status(400).json({ error: 'No changes made to the room' });
     }
     res.json({ message: 'Room updated successfully' });
   } catch (err) {
-    console.error('Error updating room:', err);
+    console.error(`Error updating room id ${id}:`, err);
     res.status(500).json({ error: err.message });
   }
 });

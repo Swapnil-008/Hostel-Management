@@ -45,6 +45,32 @@ router.post('/login/admin', async (req, res) => {
   }
 });
 
+// Superadmin Login
+router.post('/login/superadmin', async (req, res) => {
+  console.log('Superadmin login request:', req.body);
+  const { username, password } = req.body;
+  try {
+    const [superadmins] = await db.query('SELECT * FROM superadmins WHERE username = ?', [username]);
+    console.log('DB result:', superadmins);
+    if (superadmins.length === 0) {
+      console.log('No superadmin found for username:', username);
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+    const superadmin = superadmins[0];
+    const isMatch = await bcrypt.compare(password, superadmin.password);
+    console.log('Password from DB:', superadmin.password);
+    console.log('Password match:', isMatch);
+    if (!isMatch) {
+      console.log('Password mismatch for username:', username);
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+    res.json({ id: superadmin.id, username: superadmin.username, email: superadmin.email, role: 'superadmin' });
+  } catch (err) {
+    console.error('Superadmin login error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Student Register
 router.post('/register/student', async (req, res) => {
   const { name, email, password } = req.body;

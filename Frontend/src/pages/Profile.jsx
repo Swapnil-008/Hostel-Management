@@ -13,12 +13,14 @@ const Profile = () => {
     if (!user) {
       navigate('/');
     } else if (user.username) {
-      // Fetch admin's updated profile and notifications
       const fetchAdminProfile = async () => {
         try {
           const res = await axios.get(`http://localhost:5000/api/admins/${user.id}`);
-          const [notifications] = await axios.get(`http://localhost:5000/api/notifications?admin_id=${user.id}`);
-          const updatedUser = { ...user, ...res.data, notifications: notifications.data };
+          const notificationsRes = await axios.get(`http://localhost:5000/api/notifications?admin_id=${user.id}`);
+          const filteredNotifications = notificationsRes.data.filter(
+            (n) => ['Payment Completion', 'Broadcast', 'Credential Creation'].includes(n.notification_type)
+          );
+          const updatedUser = { ...user, ...res.data, notifications: filteredNotifications };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
         } catch (err) {
@@ -27,12 +29,11 @@ const Profile = () => {
       };
       fetchAdminProfile();
     } else {
-      // Fetch student's updated profile and notifications
       const fetchStudentProfile = async () => {
         try {
           const res = await axios.get(`http://localhost:5000/api/students/${user.id}`);
-          const [notifications] = await axios.get(`http://localhost:5000/api/notifications?student_id=${user.id}`);
-          const updatedUser = { ...user, ...res.data, notifications: notifications.data };
+          const notificationsRes = await axios.get(`http://localhost:5000/api/notifications?student_id=${user.id}`);
+          const updatedUser = { ...user, ...res.data, notifications: notificationsRes.data };
           setUser(updatedUser);
           localStorage.setItem('user', JSON.stringify(updatedUser));
         } catch (err) {
@@ -57,9 +58,19 @@ const Profile = () => {
     }
   };
 
-  const extractEmailFromMessage = (message) => {
-    const emailMatch = message.match(/Email: ([^\s,]+)/);
-    return emailMatch ? emailMatch[1] : '';
+  const extractDetailsFromMessage = (message, type) => {
+    if (type === 'Payment Completion' || type === 'Credential Creation' || type === 'Room Allocation') {
+      // Example message: "Manasvi completed their payment (manasvi@gmail.com, 8585656525) for ..."
+      const parts = message.match(/^(.*?)(?: completed their payment|\(shubh@gmail.com\)| has completed payment)?(?: \((.*?), (.*?)\))? /);
+      if (parts) {
+        return {
+          name: parts[1].trim(),
+          email: parts[2] ? parts[2].trim() : '',
+          phone: parts[3] ? parts[3].trim() : '',
+        };
+      }
+    }
+    return null;
   };
 
   return (
@@ -117,36 +128,54 @@ const Profile = () => {
                     <h3 className="text-2xl font-semibold text-blue-900">Notifications</h3>
                   </div>
                   <div className="notification-scroll">
-                    {user.notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className="notification-card custom-transition flex justify-between items-start m-4"
-                      >
-                        <div>
-                          <p className="text-blue-900 font-medium">
-                            {notification.notification_type} from {notification.admin_name}
-                          </p>
-                          <p className="text-blue-900 mt-1">{notification.message}</p>
-                          {notification.notification_type === 'Room Allocation' && user.username && (
-                            <Link
-                              to={`/add-student?email=${extractEmailFromMessage(notification.message)}`}
-                              className="text-blue-500 hover:underline mt-2 block"
-                            >
-                              Create Student Account
-                            </Link>
-                          )}
-                          <p className="text-gray-500 text-sm mt-1">
-                            Received: {new Date(notification.created_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteNotification(notification.id)}
-                          className="text-red-500 hover:text-red-700 transition-colors duration-300"
+                    {user.notifications.map((notification) => {
+                      const details = extractDetailsFromMessage(notification.message, notification.notification_type);
+                      return (
+                        <div
+                          key={notification.id}
+                          className="notification-card custom-transition flex justify-between items-start m-4"
                         >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    ))}
+                          <div>
+                            <p className="text-blue-900 font-medium">
+                              {notification.notification_type} from {notification.admin_name || 'System'}
+                            </p>
+                            {details ? (
+                              <>
+                                <p className="text-blue-900 font-semibold mt-1">{notification.message.split(' (')[0]}</p>
+                                <p className="text-gray-600 mt-1"><strong>Name:</strong> {details.name}</p>
+                                {details.email && (
+                                  <p className="text-gray-600 mt-1"><strong>Email:</strong> {details.email}</p>
+                                )}
+                                {details.phone && (
+                                  <p className="text-gray-600 mt-1"><strong>Phone:</strong> {details.phone}</p>
+                                )}
+                                {(notification.notification_type === 'Payment Completion' ||
+                                  notification.notification_type === 'Room Allocation') &&
+                                  user.username && (
+                                    <Link
+                                      to={`/add-student?email=${details.email}`}
+                                      className="text-blue-500 hover:underline mt-2 block"
+                                    >
+                                      Create Student Account
+                                    </Link>
+                                  )}
+                              </>
+                            ) : (
+                              <p className="text-blue-900 mt-1">{notification.message}</p>
+                            )}
+                            <p className="text-gray-500 text-sm mt-1">
+                              Received: {new Date(notification.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteNotification(notification.id)}
+                            className="text-red-500 hover:text-red-700 transition-colors duration-300"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
