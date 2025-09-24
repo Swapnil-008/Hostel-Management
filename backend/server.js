@@ -18,7 +18,7 @@ const adminRoutes = require('./routes/admins');
 const hostelDoctorsRoutes = require('./routes/hostelDoctors');
 const hostelRulesRoutes = require('./routes/hostelRules');
 const hostelImagesRoutes = require('./routes/hostelImages');
-const superadminRoutes = require('./routes/superadmins');
+const superadminRoutes = require('./routes/superAdmins');
 
 dotenv.config();
 
