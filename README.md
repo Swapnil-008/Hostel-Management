@@ -33,7 +33,8 @@ The project is divided into three main directories: Backend, Frontend, and Datab
 
 ### Directory Structure
 Hostel-Management/
-```├── Backend/
+```
+├── Backend/
 │   ├── config/
 │   │   └── db.js              # Database connection configuration
 │   ├── routes/
