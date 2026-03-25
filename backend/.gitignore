@@ -1,0 +1,88 @@
+# Dependencies
+node_modules/
+yarn.lock
+package-lock.json
+npm-debug.log
+npm-shrinkwrap.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# Build and dist directories
+/dist
+/build
+/.next
+/out
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+.project
+.classpath
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+/coverage
+.nyc_output
+
+# Logs
+logs
+*.log
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+.directory
+
+# Cache files
+.eslintcache
+.parcel-cache
+.cache
+.vuepress/dist
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Testing
+.mocha_output
+.mocha.opts
+
+# Database files (if using SQLite or similar)
+*.sqlite
+*.sqlite3
+*.db
+
+# PM2 logs
+logs/
+pm2.log
+
+# Node
+node_modules
+.npm
+
+# Production
+dist/
+build/
+
+# Misc
+*.pem
+*.key

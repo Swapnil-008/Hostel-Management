@@ -31,13 +31,11 @@ const razorpay = new Razorpay({
 
 // Middleware
 app.use(cors({ 
-  origin: 
-  // [
-  //   'http://localhost:5173', // Local development
-  //   'https://hostel-management-wegk.vercel.app', // Your Vercel frontend
-  //   'https://hostel-management.vercel.app' // Main domain
-  // ]
-  true,
+  origin: [
+    'http://localhost:5173', // Local development
+    'https://hostel-management-wegk.vercel.app', // Your Vercel frontend
+    'https://hostel-management.vercel.app' // Main domain
+  ],
   credentials: true
 }));
 app.use(express.json());
