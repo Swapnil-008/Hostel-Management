@@ -5,6 +5,7 @@ import Footer from './Footer';
 
 // Get API base URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_9Q6Lg9fdFP0HHi';
 
 const Payment = () => {
   const [amount, setAmount] = useState(0);
@@ -28,7 +29,7 @@ const Payment = () => {
       setOrderId(order_id);
 
       const options = {
-        key: 'rzp_test_9Q6Lg9fdFP0HHi', // This is a Razorpay test key - consider making it an environment variable too
+        key: RAZORPAY_KEY, // This is a Razorpay test key - consider making it an environment variable too
         amount: amount * 100,
         currency: 'INR',
         name: 'Hostel Management',

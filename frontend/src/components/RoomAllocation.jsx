@@ -29,6 +29,7 @@ import {
 
 // Get API base URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_9Q6Lg9fdFP0HHi';
 
 const RoomAllocation = () => {
   const [view, setView] = useState('hostels');
@@ -221,7 +222,7 @@ const RoomAllocation = () => {
       const { id: order_id } = orderRes.data;
 
       const options = {
-        key: 'rzp_test_9Q6Lg9fdFP0HHi',
+        key: RAZORPAY_KEY,
         amount: amount * 100,
         currency: 'INR',
         name: 'Hostel Management',
