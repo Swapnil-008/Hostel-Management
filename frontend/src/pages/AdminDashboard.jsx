@@ -6,7 +6,8 @@ import Footer from '../components/Footer';
 import { Navigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
-  const user = JSON.parse(localStorage.getItem('user')); // Admin user
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
 
   // Redirect if not an admin
   if (!user || !user.username) {

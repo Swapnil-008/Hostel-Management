@@ -10,7 +10,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const userStr = localStorage.getItem('user');
+  const [user, setUser] = useState(userStr ? JSON.parse(userStr) : null);
 
   useEffect(() => {
     if (!user) {

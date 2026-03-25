@@ -1,0 +1,131 @@
+# Dependencies
+node_modules/
+yarn.lock
+package-lock.json
+npm-debug.log
+npm-shrinkwrap.json
+pnpm-lock.yaml
+.pnp
+.pnp.js
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# Build and dist directories
+dist/
+dist-ssr/
+*.local
+/build
+/.next
+/out
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+.project
+.classpath
+*.code-workspace
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+/coverage
+.nyc_output
+.lcov.info
+
+# Logs
+logs
+*.log
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+.directory
+
+# Cache files
+.eslintcache
+.parcel-cache
+.cache
+.vuepress/dist
+.next
+.turbo
+.turbopack
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+~*
+
+# Testing
+.mocha_output
+.mocha.opts
+.vitest/
+
+# Vite specific
+vite.config.js.timestamp-*
+.vite/
+
+# React/Vue specific
+.react-router/
+
+# Nuxt
+.nuxt/
+nuxt.config.ts.timestamp-*
+
+# Development
+.env.development.local
+.env.test.local
+
+# Bundle analyzer
+.size-snapshot.json
+dist-stats.html
+
+# Misc
+*.pem
+*.key
+.npmrc
+.yarnrc
+
+# OS Specific
+.AppleDouble
+.LSOverride
+*.swp
+*~
+.vscode-settings.json
+
+# Storybook
+storybook-static/
+
+# Playwright
+test-results/
+playwright-report/
+
+# Firebase
+.firebase/
+
+# Vercel
+.vercel
+.vercelignore
+
+# Turborepo
+.turbo
+
+# Production
+production/

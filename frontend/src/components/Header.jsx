@@ -4,7 +4,8 @@ import { FaSignOutAlt, FaPaperPlane, } from 'react-icons/fa';
 
 const Header = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
 
   const handleLogout = () => {
     localStorage.removeItem('user');

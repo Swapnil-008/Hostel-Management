@@ -30,7 +30,8 @@ const SuperadminDashboard = () => {
   const [searchComplaints, setSearchComplaints] = useState('');
   const [searchAdmissions, setSearchAdmissions] = useState('');
   const [searchAttendance, setSearchAttendance] = useState('');
-  const user = JSON.parse(localStorage.getItem('user'));
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
 
   if (!user || user.role !== 'superadmin') {
     return <Navigate to="/login/superadmin" />;
